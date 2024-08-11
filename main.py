@@ -37,7 +37,7 @@ class MineSweeper:
     window = tk.Tk()
     ROW = 8
     COLUMN = 9
-    MINES = 45
+    MINES = 20
 
     def __init__(self):
         self.buttons = []
@@ -57,11 +57,19 @@ class MineSweeper:
                 disabledforeground='black'
             )
         else:
-            clicked_button.config(
-                text=clicked_button.number,
-                disabledforeground='black'
-            )
+            color = colors.get(clicked_button.count_bomb, 'black')
+            if clicked_button.count_bomb:
+                clicked_button.config(
+                    text=clicked_button.count_bomb,
+                    disabledforeground=color
+                )
+            else:
+                clicked_button.config(
+                    text='',
+                    disabledforeground=color
+                )
         clicked_button.config(state='disabled')
+        clicked_button.config(relief=tk.SUNKEN)
 
     def create_widgets(self):
         for i in range(1, MineSweeper.ROW+1):
@@ -91,7 +99,7 @@ class MineSweeper:
         self.insert_mines()
         self.count_mines_in_buttons()
         self.print_buttons()
-        self.open_all_buttons()
+        # self.open_all_buttons()
         MineSweeper.window.mainloop()
 
     def print_buttons(self):
