@@ -28,6 +28,7 @@ class MyButton(tk.Button):
         self.number = number
         self.is_mine = False
         self.count_bomb = 0
+        self.is_open = False
 
     def __repr__(self):
         return f'MyButton{self.x} {self.y} {self.number} {self.is_mine}'
@@ -37,7 +38,7 @@ class MineSweeper:
     window = tk.Tk()
     ROW = 8
     COLUMN = 9
-    MINES = 20
+    MINES = 10
 
     def __init__(self):
         self.buttons = []
@@ -56,6 +57,7 @@ class MineSweeper:
                 background='red',
                 disabledforeground='black'
             )
+            clicked_button.is_open = True
         else:
             color = colors.get(clicked_button.count_bomb, 'black')
             if clicked_button.count_bomb:
@@ -63,13 +65,41 @@ class MineSweeper:
                     text=clicked_button.count_bomb,
                     disabledforeground=color
                 )
+                clicked_button.is_open = True
             else:
-                clicked_button.config(
+                self.breadth_first_search(clicked_button)
+        clicked_button.config(state='disabled')
+        clicked_button.config(relief=tk.SUNKEN)
+
+    def breadth_first_search(self, btn: MyButton):
+        queue = [btn]
+        while queue:
+            cur_btn = queue.pop()
+            color = colors.get(cur_btn.count_bomb, 'black')
+            if cur_btn.count_bomb:
+                cur_btn.config(
+                    text=cur_btn.count_bomb,
+                    disabledforeground=color
+                )
+            else:
+                cur_btn.config(
                     text='',
                     disabledforeground=color
                 )
-        clicked_button.config(state='disabled')
-        clicked_button.config(relief=tk.SUNKEN)
+            cur_btn.is_open = True
+            cur_btn.config(state='disabled')
+            cur_btn.config(relief=tk.SUNKEN)
+
+            if cur_btn.count_bomb == 0:
+                x, y = cur_btn.x, cur_btn.y
+                for dx in [-1, 0, 1]:
+                    for dy in [-1, 0, 1]:
+                        if not abs(dx - dy) == 1:
+                            continue
+                        next_btn = self.buttons[x+dx][y+dy]
+                        if not next_btn.is_open and 1 <= next_btn.x <= MineSweeper.ROW and \
+                                1 <= next_btn.y <= MineSweeper.COLUMN and next_btn not in queue:
+                            queue.append(next_btn)
 
     def create_widgets(self):
         for i in range(1, MineSweeper.ROW+1):
