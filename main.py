@@ -55,10 +55,13 @@ class MineSweeper:
             self.buttons.append(temp)
 
     def click(self, clicked_button: MyButton):
+        if MineSweeper.IS_GAME_OVER:
+            return None
         if MineSweeper.IS_FIRST_CLICK:
             self.insert_mines(clicked_button.number)
             self.count_mines_in_buttons()
             self.print_buttons()
+            MineSweeper.IS_FIRST_CLICK = False
         if clicked_button.is_mine:
             clicked_button.config(
                 text='*',
@@ -117,6 +120,13 @@ class MineSweeper:
                             queue.append(next_btn)
 
     def create_widgets(self):
+        menubar = tk.Menu(self.window)
+        self.window.config(menu=menubar)
+        settings_menu = tk.Menu(menubar, tearoff=0)
+        settings_menu.add_command(label='Играть')
+        settings_menu.add_command(label='Настройки')
+        settings_menu.add_command(label='Выход', command=self.window.destroy)
+        menubar.add_cascade(label='Файл', menu=settings_menu)
         count = 1
         for i in range(1, MineSweeper.ROW+1):
             for j in range(1, MineSweeper.COLUMN+1):
